@@ -25,6 +25,7 @@ pub mod errors;
 pub mod filters;
 pub mod handlers;
 pub mod reply;
+mod scope;
 pub mod storage;
 pub mod tasks;
 pub mod tokens;

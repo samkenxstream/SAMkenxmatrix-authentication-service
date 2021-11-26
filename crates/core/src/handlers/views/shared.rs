@@ -15,11 +15,12 @@
 use hyper::Uri;
 use mas_data_model::StorageBackend;
 use mas_templates::PostAuthContext;
+use oauth2_types::scope::Scope;
 use serde::{Deserialize, Serialize};
 use sqlx::PgExecutor;
 
 use super::super::oauth2::ContinueAuthorizationGrant;
-use crate::storage::PostgresqlBackend;
+use crate::{scope::detect_scopes, storage::PostgresqlBackend};
 
 #[derive(Deserialize, Serialize)]
 #[serde(rename_all = "snake_case", tag = "next")]
@@ -57,8 +58,23 @@ impl PostAuthAction<PostgresqlBackend> {
         match self {
             Self::ContinueAuthorizationGrant(c) => {
                 let grant = c.fetch_authorization_grant(executor).await?;
+
+                let (to_grant, granted): (Vec<_>, Vec<_>) =
+                    detect_scopes(&Scope::default(), &grant.scope)
+                        .into_iter()
+                        .map(|x| (x.display_to_grant(), x.display_granted()))
+                        .unzip();
+
+                let to_grant = to_grant.into_iter().flatten().collect();
+                let granted = granted.into_iter().flatten().collect();
+
                 let grant = grant.into();
-                Ok(PostAuthContext::ContinueAuthorizationGrant { grant })
+
+                Ok(PostAuthContext::ContinueAuthorizationGrant {
+                    grant,
+                    to_grant,
+                    granted,
+                })
             }
         }
     }

@@ -214,7 +214,11 @@ pub enum LoginFormField {
 #[derive(Serialize)]
 #[serde(tag = "kind", rename_all = "snake_case")]
 pub enum PostAuthContext {
-    ContinueAuthorizationGrant { grant: AuthorizationGrant<()> },
+    ContinueAuthorizationGrant {
+        grant: AuthorizationGrant<()>,
+        to_grant: Vec<String>,
+        granted: Vec<String>,
+    },
 }
 
 /// Context used by the `login.html` template

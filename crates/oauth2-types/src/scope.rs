@@ -81,7 +81,7 @@ impl ToString for ScopeToken {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Default)]
 pub struct Scope(HashSet<ScopeToken>);
 
 impl FromStr for Scope {
@@ -120,6 +120,10 @@ impl Scope {
 
     pub fn insert(&mut self, value: ScopeToken) -> bool {
         self.0.insert(value)
+    }
+
+    pub fn iter(&self) -> impl Iterator<Item = &ScopeToken> {
+        self.0.iter()
     }
 }
 

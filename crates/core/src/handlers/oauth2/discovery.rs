@@ -20,6 +20,7 @@ use oauth2_types::{
     oidc::{Metadata, SigningAlgorithm},
     pkce::CodeChallengeMethod,
     requests::{ClientAuthenticationMethod, GrantType, ResponseMode},
+    scope::{ADDRESS, EMAIL, OPENID, PHONE, PROFILE},
 };
 use warp::{Filter, Rejection, Reply};
 
@@ -81,6 +82,13 @@ pub(super) fn filter(
         s
     });
 
+    let scopes_supported = Some(
+        [OPENID, PROFILE, EMAIL, ADDRESS, PHONE]
+            .iter()
+            .map(ToString::to_string)
+            .collect(),
+    );
+
     let metadata = Metadata {
         authorization_endpoint: base.join("oauth2/authorize").ok(),
         token_endpoint: base.join("oauth2/token").ok(),
@@ -89,7 +97,7 @@ pub(super) fn filter(
         userinfo_endpoint: base.join("oauth2/userinfo").ok(),
         issuer: base,
         registration_endpoint: None,
-        scopes_supported: None,
+        scopes_supported,
         response_types_supported,
         response_modes_supported,
         grant_types_supported,
